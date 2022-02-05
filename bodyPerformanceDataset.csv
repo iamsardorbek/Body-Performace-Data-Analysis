@@ -1,4 +1,4 @@
-age,gender,height_cm,weight_kg,body fat_%,diastolic,systolic,gripForce,sit and bend forward_cm,sit-ups counts,broad jump_cm,class
+age,gender,height_cm,weight_kg,body_fat_percentage,diastolic,systolic,gripForce,sit_and_bend_forward_cm,sit_ups_count,broad_jump_cm,class
 24.0,F,152.4,42.5,23.4,57.0,112.0,27.4,14.2,50.0,184.0,C
 27.0,F,162.1,70.9,35.7,97.0,148.0,30.6,11.0,42.0,157.0,D
 23.0,M,173.7,68.3,13.6,76.0,137.0,47.7,16.5,48.0,208.0,C
