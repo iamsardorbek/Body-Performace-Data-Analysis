@@ -6,7 +6,9 @@ import seaborn as sns
 import matplotlib as mp
 import matplotlib.pyplot as plt
 import cv2
-import PyQt5
+import xgboost as xgb
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, mean_squared_error
 from pandas.conftest import axis
 
 # Before starting work, I reviewed the csv dataset and noticed that column names were non-standard. This would create
@@ -125,6 +127,13 @@ if __name__ == '__main__':
         data.drop(rows_with_wrong_broad_jump.index, inplace=True)
         results_file.write("Rows with wrong broad jump length deleted.\n\n")
 
+    # change categorical values of gender ('F', 'M') to binary (0, 1) values
+    data["gender"] = np.where(data["gender"] == "F", 0, 1)
+    data["class"] = np.where(data["class"] == "A", 0, data["class"])
+    data["class"] = np.where(data["class"] == "B", 1, data["class"])
+    data["class"] = np.where(data["class"] == "C", 2, data["class"])
+    data["class"] = np.where(data["class"] == "D", 3, data["class"])
+
     # 3. relationship analysis
     # correlation heatmap
     correlation = data.corr()
@@ -172,5 +181,40 @@ if __name__ == '__main__':
     results_file.write("You can check out the visualizations made with seaborn and matplotlib tools in the following "
                        "image files: correlation_heatmap.png, pair_plot.png, relational_plot.png, "
                        "histogram_plot.png, categorical_plot.png\n\n")
+
+    # train a regression model, because the majority of data is continuous rather than discrete.
+    # We would use classifier model for that case
+    x, y = data.iloc[:, :-1], data.iloc[:, -1]
+    data_dmatrix = xgb.DMatrix(data=x, label=y)
+    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1, random_state=123)
+    xg_reg = xgb.XGBRegressor(objective='reg:linear', colsample_bytree=0.3, learning_rate=0.1,
+                              max_depth=5, alpha=10, n_estimators=60)
+    xg_reg.fit(x_train, y_train)
+
+    predictions = xg_reg.predict(x_test)
+    rmse = np.sqrt(mean_squared_error(y_test, predictions))  # root-mean-square error
+    print("RMSE Computed: %f" % (rmse))
+
+    # Result is displayed in an openCV window too
+    # Setup text display parameters
+    text = "RMSE Computed: %f" % rmse
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    bottomLeftCornerOfText = (10, 300)
+    fontScale = 1
+    fontColor = (255, 255, 255)
+    thickness = 1
+    lineType = 2
+
+    result_img = np.zeros((512, 512, 3), np.uint8)  # Create a black image
+    cv2.putText(result_img,
+                text,
+                bottomLeftCornerOfText,
+                font,
+                fontScale,
+                fontColor,
+                thickness,
+                lineType)
+    cv2.imshow("Result of testing the regression model", result_img)
+
     cv2.waitKey(0)
     cv2.destroyAllWindows()
