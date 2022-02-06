@@ -170,3 +170,17 @@ Rows with wrong sit and bend forward length:
 6780  32.0      M      172.3      69.60                 17.9       73.0     151.0       39.6                     -0.6           46.0          214.0     D
 6991  52.0      M      173.4      81.20                 23.9       90.0     149.0       39.9                     -2.3           29.0          173.0     D
 7001  24.0      F      167.2      70.00                 35.3       54.0     103.0       23.3                     -0.5           22.0          120.0     D
+Rows with wrong sit and bend forward length deleted.
+
+Rows with wrong broad jump length:
+       age gender  height_cm  weight_kg  body_fat_percentage  diastolic  systolic  gripForce  sit_and_bend_forward_cm  sit_ups_count  broad_jump_cm class
+1642  56.0      F      156.0       51.1                 28.4       73.0     113.0       20.7                     23.0           23.0            0.0     C
+2095  59.0      F      162.9       61.0                 32.6       82.0     123.0       29.7                     19.5            0.0            0.0     D
+4306  28.0      M      176.6       82.2                 20.7       83.0     126.0       40.9                     17.6           46.0            0.0     C
+6882  50.0      M      178.2       88.4                 23.4       85.0     146.0       54.9                     19.3           51.0            0.0     C
+Rows with wrong broad jump length deleted.
+
+Max correlation is between gender and gripForce, absolute value = 0.814583
+
+You can check out the visualizations made with seaborn and matplotlib tools in the following image files: correlation_heatmap.png, pair_plot.png, relational_plot.png, histogram_plot.png, categorical_plot.png
+
