@@ -1,15 +1,16 @@
-from builtins import print
+# main program that:
+# - holds EDA removing duplicates, checking for data inconsistencies, encoding categorical values into numbers and
+# visualizing the data
+# - trains a classifier XGBoost model and computes the accuracy of the model
 
 import pandas as pd
 import numpy as np
 import seaborn as sns
-import matplotlib as mp
 import matplotlib.pyplot as plt
 import cv2
 import xgboost as xgb
 from sklearn.model_selection import train_test_split
-from sklearn.metrics import accuracy_score, mean_squared_error
-from pandas.conftest import axis
+from sklearn.metrics import accuracy_score
 
 # Before starting work, I reviewed the csv dataset and noticed that column names were non-standard. This would create
 # inconveniences referencing them in code, so I renamed some columns to use '_' instead of spaces.
@@ -17,7 +18,7 @@ from pandas.conftest import axis
 if __name__ == '__main__':
     data = pd.read_csv("bodyPerformanceDataset.csv")
 
-    # 1. understand the data and save the results in a text (for readability)
+    # 1. understand the data and save the results in a text file "results.txt" (for readability)
     results_file = open(r"results.txt", "w")
 
     results_file.write("Primary information about the dataset:\n")
@@ -182,39 +183,41 @@ if __name__ == '__main__':
                        "image files: correlation_heatmap.png, pair_plot.png, relational_plot.png, "
                        "histogram_plot.png, categorical_plot.png\n\n")
 
-    # train a regression model, because the majority of data is continuous rather than discrete.
-    # We would use classifier model for that case
-    x, y = data.iloc[:, :-1], data.iloc[:, -1]
-    data_dmatrix = xgb.DMatrix(data=x, label=y)
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.1, random_state=123)
-    xg_reg = xgb.XGBRegressor(objective='reg:linear', colsample_bytree=0.3, learning_rate=0.1,
-                              max_depth=5, alpha=10, n_estimators=60)
-    xg_reg.fit(x_train, y_train)
+    # train a classification model, because the output data is discrete (A, B, C, D) rather than continuous.
+    # We would use regression model for that case
 
-    predictions = xg_reg.predict(x_test)
-    rmse = np.sqrt(mean_squared_error(y_test, predictions))  # root-mean-square error
-    print("RMSE Computed: %f" % (rmse))
+    X, y = data.iloc[:, :-1], data.iloc[:, -1]
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=7)
+    model = xgb.XGBClassifier()
+    model.fit(X_train, y_train)
+    model.save_model("model.json")
+
+    predictions = model.predict(X_test)
+
+    predictions = list(predictions)
+    y_test = list(y_test)
+    accuracy = accuracy_score(y_test, predictions)
 
     # Result is displayed in an openCV window too
     # Setup text display parameters
-    text = "RMSE Computed: %f" % rmse
+    text_accuracy = "Accuracy Computed: %f" % accuracy
     font = cv2.FONT_HERSHEY_SIMPLEX
-    bottomLeftCornerOfText = (10, 300)
-    fontScale = 1
-    fontColor = (255, 255, 255)
+    text_position_accuracy = (10, 400)
+    font_scale = 1
+    font_color = (255, 255, 255)
     thickness = 1
-    lineType = 2
+    line_type = 2
 
     result_img = np.zeros((512, 512, 3), np.uint8)  # Create a black image
-    cv2.putText(result_img,
-                text,
-                bottomLeftCornerOfText,
-                font,
-                fontScale,
-                fontColor,
-                thickness,
-                lineType)
-    cv2.imshow("Result of testing the regression model", result_img)
+    cv2.putText(result_img, text_accuracy,
+                text_position_accuracy, font, font_scale, font_color, thickness, line_type)
+    cv2.imshow("Result of testing the classification model", result_img)
+
+    results_file.write("XGBoost classifier model has been trained to predict 'class' of a person.\n"
+                       "The accuracy of the model is %d percent\n" % (accuracy * 100))
+    results_file.write("\n\n")
+
+    results_file.close()
 
     cv2.waitKey(0)
     cv2.destroyAllWindows()

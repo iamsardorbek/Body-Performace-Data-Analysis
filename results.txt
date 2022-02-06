@@ -184,3 +184,7 @@ Max correlation is between gender and gripForce, absolute value = 0.814583
 
 You can check out the visualizations made with seaborn and matplotlib tools in the following image files: correlation_heatmap.png, pair_plot.png, relational_plot.png, histogram_plot.png, categorical_plot.png
 
+XGBoost classifier model has been trained to predict 'class' of a person.
+The accuracy of the model is 72 percent
+
+
