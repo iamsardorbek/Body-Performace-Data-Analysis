@@ -11,6 +11,9 @@ import cv2
 import xgboost as xgb
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import classification_report
+
 
 # Before starting work, I reviewed the csv dataset and noticed that column names were non-standard. This would create
 # inconveniences referencing them in code, so I renamed some columns to use '_' instead of spaces.
@@ -197,6 +200,21 @@ if __name__ == '__main__':
     predictions = list(predictions)
     y_test = list(y_test)
     accuracy = accuracy_score(y_test, predictions)
+
+    # save the confusion matrix of the dataset to "confusion_matrix.png"
+    cm = confusion_matrix(y_test, predictions)
+    df_cm = pd.DataFrame(cm, ['A', 'B', 'C', 'D'], ['A', 'B', 'C', 'D'])
+    sns.set(font_scale=1.25)  # for label size
+    sns.heatmap(df_cm, annot=True, annot_kws={"size": 12})  # font size
+    plt.savefig("confusion_matrix.png", bbox_inches='tight')  # save to a file
+    plt.clf()
+
+    # classification report
+    clf_report = classification_report(y_test, predictions, target_names=['A', 'B', 'C', 'D'], output_dict=True)
+    sns.set(font_scale=1)  # for label size
+    sns.heatmap(pd.DataFrame(clf_report).iloc[:-1, :].T, annot=True)
+    plt.savefig("classification_report.png", bbox_inches='tight')  # save to a file
+    plt.clf()
 
     # Result is displayed in an openCV window too
     # Setup text display parameters
