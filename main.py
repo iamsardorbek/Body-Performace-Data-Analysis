@@ -3,17 +3,19 @@
 # visualizing the data
 # - trains a classifier XGBoost model and computes the accuracy of the model
 
-import pandas as pd
-import numpy as np
-import seaborn as sns
-import matplotlib.pyplot as plt
 import cv2
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
 import xgboost as xgb
-from sklearn.model_selection import train_test_split
+from scipy.stats import loguniform
 from sklearn.metrics import accuracy_score
-from sklearn.metrics import confusion_matrix
 from sklearn.metrics import classification_report
-
+from sklearn.metrics import confusion_matrix
+from sklearn.model_selection import RandomizedSearchCV
+from sklearn.model_selection import RepeatedStratifiedKFold
+from sklearn.model_selection import train_test_split
 
 # Before starting work, I reviewed the csv dataset and noticed that column names were non-standard. This would create
 # inconveniences referencing them in code, so I renamed some columns to use '_' instead of spaces.
@@ -194,9 +196,7 @@ if __name__ == '__main__':
     model = xgb.XGBClassifier()
     model.fit(X_train, y_train)
     model.save_model("model.json")
-
     predictions = model.predict(X_test)
-
     predictions = list(predictions)
     y_test = list(y_test)
     accuracy = accuracy_score(y_test, predictions)
@@ -236,6 +236,19 @@ if __name__ == '__main__':
     results_file.write("\n\n")
 
     results_file.close()
+
+    # Optimization techniques for parameter tuning. RandomizedSearchCV
+    # define search space
+    space = dict()
+    space['solver'] = ['newton-cg', 'lbfgs', 'liblinear']
+    space['penalty'] = ['none', 'l1', 'l2', 'elasticnet']
+    space['C'] = loguniform(1e-5, 100)
+    cv = RepeatedStratifiedKFold(n_splits=10, n_repeats=3, random_state=1)
+    # the below function is taking long to execute fully
+    search = RandomizedSearchCV(model, space, n_iter=10, scoring='accuracy', n_jobs=-1, cv=cv, random_state=1)
+    result = search.fit(X, list(y))
+    print('Best Score: %s' % result.best_score_)
+    print('Best hyper parameters: %s' % result.best_params_)
 
     cv2.waitKey(0)
     cv2.destroyAllWindows()
